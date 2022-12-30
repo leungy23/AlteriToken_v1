@@ -4,7 +4,10 @@ coverage
 coverage.json
 typechain
 typechain-types
-
+.prettierignore
+.prettier
+JL_Solidity.code-workspae
+yarn.lock
 # Hardhat files
 cache
 artifacts

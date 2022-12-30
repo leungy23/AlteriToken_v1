@@ -6,9 +6,8 @@ typechain
 typechain-types
 .prettierignore
 .prettier
-JL_Solidity.code-workspae
+JL_Solidity.code-workspace
 yarn.lock
 # Hardhat files
 cache
 artifacts
-

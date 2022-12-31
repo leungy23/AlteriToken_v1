@@ -1,13 +1,13 @@
 node_modules
 .env
-coverage
-coverage.json
 typechain
 typechain-types
+cache
+artifacts
+gas-report.txt
+coverage.json
+coverage
 .prettierignore
 .prettier
 JL_Solidity.code-workspace
 yarn.lock
-# Hardhat files
-cache
-artifacts

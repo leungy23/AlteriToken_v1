@@ -93,6 +93,8 @@ contract AlteriToken {
 
     // TODO: Function to remove a user from the personList
 
+    // TODO: Function to remove a user from the personList
+
     // Function to transfer tokens to a merchant
     function spendDonation(address to, uint256 amount) public payable {
         // Ensure the merchant is in the merchantList

@@ -4,6 +4,8 @@ pragma solidity ^0.8.7;
 // TODO work out how to ensure person(s), vendors and verifiers cannot be in eachothers list - some require function...  tbc. require(person =! vendorList[]);
 
 contract AlteriToken {
+    error custError();
+
     //declare variables
     address public owner;
 
@@ -14,98 +16,87 @@ contract AlteriToken {
 
     struct person {
         string pName;
-        uint256 pID;
+        address pAddress;
     }
 
     struct verifier {
         string vName;
-        uint256 vID;
+        address vAddress;
     }
 
     struct merchant {
         string mName;
-        uint256 mID;
+        address mAddress;
     }
 
     // Mapping from user addresses to their balances
     mapping(address => uint256) public balances;
 
     // Mapping from user addresses to their roles
-    mapping(address => verifier[]) public verifierList;
-    mapping(address => person[]) public personList;
-    mapping(address => merchant[]) public merchantList;
+    mapping(uint256 => verifier) public vMapping;
+    mapping(uint256 => person) public pMapping;
+    mapping(uint256 => merchant) public mMapping;
+
+    verifier[] internal vArray;
+    person[] internal pArray;
+    merchant[] internal mArray;
+
+    verifier public Verifier;
+    person public Person;
+    merchant public Merchant;
 
     // Function to allow owner to add a verifier
     function addVerifier(
-        address _address,
+        address _vAddress,
         string memory _vName,
         uint256 _vID
-    ) public {
+    ) external {
         //enforce only owner can add verifiers
-        require(msg.sender == owner, "Only owner can add a new verifier.");
-        // add verifier to verifierList
-        verifierList[_address].push(verifier(_vName, _vID));
+        if (msg.sender != owner) revert custError();
+        // add verifier
+        verifier memory newVerifier = verifier(_vName, _vAddress);
+        vMapping[_vID] = newVerifier;
+        vArray.push(newVerifier);
     }
 
-    // Function to remove a verifier from the verifierList
-    function removeVerifier(address _vAddress) public {
-        //enforce only owner can remove verifiers
-        require(msg.sender == owner, "Only owner can remove a verifier.");
-        // Remove the user from the verifierList
-        delete verifierList[_vAddress];
-    }
+    // TODO: Function to remove a verifier from the verifierList
 
     // Function to add a user to the personList
-    function addPerson(address _pAddress, string memory _pName) public {
-        //enforce only verifiers can add people
-        require(
-            verifierList[msg.sender] == true,
-            "Only authorised Verifiers can add People"
-        );
-        // Add the user to personList
-        personList[_pAddress] = _pName;
+    function addPerson(
+        address _pAddress,
+        string memory _pName,
+        uint256 _pID
+    ) external {
+        //enforce only verifier can add person
+        if (msg.sender != Verifier.vAddress) revert custError();
+        // add person  to personList
+        person memory newPerson = person(_pName, _pAddress);
+        pMapping[_pID] = newPerson;
+        pArray.push(newPerson);
     }
 
-    // Function to remove a user from the personList
-    function removePerson(address _PersonToDelete) public {
-        // Only allow verifiers to remove people
-        require(
-            verifierList[msg.sender] == true,
-            "Only authorised Verifiers can remove People"
-        );
-        // Delete the member from personList.
-        personList[_PersonToDelete] = false;
-    }
+    // TODO: Function to remove a user from the personList
 
     // Function to add a merchant to the merchantList
-    function addMerchant(address _mAddress, string memory _mName) public {
-        //enforce only verifiers can add people
-        require(
-            verifierList[msg.sender] == true,
-            "Only authorised Verifiers can add Merchants"
-        );
-        // Add the user to personList
-        merchantList[_mAddress] = _mName;
+    function addMerchant(
+        address _mAddress,
+        string memory _mName,
+        uint256 _mID
+    ) public {
+        //enforce only verifier can add merchant
+        if (msg.sender != Verifier.vAddress) revert custError();
+        // add merchant
+        merchant memory newMerchant = merchant(_mName, _mAddress);
+        mMapping[_mID] = newMerchant;
+        mArray.push(newMerchant);
     }
 
-    // Function to remove a user from the personList
-    function removeMerchant(address _MerchantToDelete) public {
-        // Only allow verifiers to remove merchants
-        require(
-            verifierList[msg.sender] == true,
-            "Only authorised Verifiers can remove Merchants"
-        );
-        // Delete the member from personList.
-        merchantList[_MerchantToDelete] = false;
-    }
+    // TODO: Function to remove a user from the personList
 
     // Function to transfer tokens to a merchant
     function spendDonation(address to, uint256 amount) public payable {
         // Ensure the merchant is in the merchantList
-        require(
-            merchantList[to] == true,
-            "Recipient must be an authorised Merchant"
-        );
+        if (msg.sender != Merchant.mAddress) revert custError();
         // Ensure the sender has sufficient funds
         require(balances[msg.sender] >= amount, "Insufficient funds");
         // Transfer the tokens

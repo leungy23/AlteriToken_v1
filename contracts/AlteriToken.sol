@@ -3,9 +3,11 @@ pragma solidity ^0.8.7;
 
 // TODO work out how to ensure person(s), vendors and verifiers cannot be in eachothers list - some require function...  tbc. require(person =! vendorList[]);
 
-contract AlteriToken {
-    error custError();
+error notOwner();
+error notVerifier();
+error notMerchant();
 
+contract AlteriToken {
     //declare variables
     address public owner;
 
@@ -16,30 +18,30 @@ contract AlteriToken {
 
     struct person {
         string pName;
-        address pAddress;
+        bool isPerson;
     }
 
     struct verifier {
         string vName;
-        address vAddress;
+        bool isVerifier;
     }
 
     struct merchant {
         string mName;
-        address mAddress;
+        bool isMerchant;
     }
 
     // Mapping from user addresses to their balances
     mapping(address => uint256) public balances;
 
     // Mapping from user addresses to their roles
-    mapping(uint256 => verifier) public vMapping;
-    mapping(uint256 => person) public pMapping;
-    mapping(uint256 => merchant) public mMapping;
+    mapping(address => verifier) public vMapping;
+    mapping(address => person) public pMapping;
+    mapping(address => merchant) public mMapping;
 
-    verifier[] internal vArray;
-    person[] internal pArray;
-    merchant[] internal mArray;
+    verifier[] public vArray;
+    person[] public pArray;
+    merchant[] public mArray;
 
     verifier public Verifier;
     person public Person;
@@ -47,15 +49,15 @@ contract AlteriToken {
 
     // Function to allow owner to add a verifier
     function addVerifier(
-        address _vAddress,
         string memory _vName,
-        uint256 _vID
+        bool _isVerifier,
+        address _Address
     ) external {
         //enforce only owner can add verifiers
-        if (msg.sender != owner) revert custError();
+        if (msg.sender != owner) revert notOwner();
         // add verifier
-        verifier memory newVerifier = verifier(_vName, _vAddress);
-        vMapping[_vID] = newVerifier;
+        verifier memory newVerifier = verifier(_vName, _isVerifier);
+        vMapping[_Address] = newVerifier;
         vArray.push(newVerifier);
     }
 
@@ -63,15 +65,15 @@ contract AlteriToken {
 
     // Function to add a user to the personList
     function addPerson(
-        address _pAddress,
+        address _Address,
         string memory _pName,
-        uint256 _pID
+        bool _isPerson
     ) external {
         //enforce only verifier can add person
-        if (msg.sender != Verifier.vAddress) revert custError();
+        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
         // add person  to personList
-        person memory newPerson = person(_pName, _pAddress);
-        pMapping[_pID] = newPerson;
+        person memory newPerson = person(_pName, _isPerson);
+        pMapping[_Address] = newPerson;
         pArray.push(newPerson);
     }
 
@@ -81,24 +83,22 @@ contract AlteriToken {
     function addMerchant(
         address _mAddress,
         string memory _mName,
-        uint256 _mID
+        bool _isMerchant
     ) public {
         //enforce only verifier can add merchant
-        if (msg.sender != Verifier.vAddress) revert custError();
+        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
         // add merchant
-        merchant memory newMerchant = merchant(_mName, _mAddress);
-        mMapping[_mID] = newMerchant;
+        merchant memory newMerchant = merchant(_mName, _isMerchant);
+        mMapping[_mAddress] = newMerchant;
         mArray.push(newMerchant);
     }
-
-    // TODO: Function to remove a user from the personList
 
     // TODO: Function to remove a user from the personList
 
     // Function to transfer tokens to a merchant
     function spendDonation(address to, uint256 amount) public payable {
         // Ensure the merchant is in the merchantList
-        if (msg.sender != Merchant.mAddress) revert custError();
+        if (mMapping[msg.sender].isMerchant != true) revert notMerchant();
         // Ensure the sender has sufficient funds
         require(balances[msg.sender] >= amount, "Insufficient funds");
         // Transfer the tokens

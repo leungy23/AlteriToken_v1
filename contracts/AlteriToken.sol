@@ -1,118 +1,132 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.8;
+pragma solidity ^0.8.7;
 
 // TODO work out how to ensure person(s), vendors and verifiers cannot be in eachothers list - some require function...  tbc. require(person =! vendorList[]);
 
-error notPerson();
-error notVerifier();
-error notVendor();
-
 contract AlteriToken {
-    // Set contract deployer as owner
+    //declare variables
+    address public owner;
+
+    //make deployer the owner
     constructor() {
         owner = msg.sender;
     }
 
-    // Structs for 3 actors
     struct person {
-        string personName;
-        address personAddress;
-    }
-    struct verifier {
-        string verifierName;
-        address verifierAddress;
-    }
-    struct vendor {
-        string vendorName;
-        address vendorAddress;
+        string pName;
+        uint256 pID;
     }
 
-    // Modifiers for 3 actors
-    // Possible issue is using the struct - might need to use xAddress instead of the struct name
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        if (msg.sender != owner) revert notOwner();
-        _;
+    struct verifier {
+        string vName;
+        uint256 vID;
     }
-    modifier onlyPerson() {
-        require(msg.sender == person);
-        if (msg.sender != person) revert notPerson();
-        _;
-    }
-    modifier onlyVerifier() {
-        require(msg.sender == verifier);
-        if (msg.sender != verifier) revert notVerifier();
-        _;
-    }
-    modifier onlyVendor() {
-        require(msg.sender == vendor);
-        if (msg.sender != vendor) revert notVendor();
-        _;
+
+    struct merchant {
+        string mName;
+        uint256 mID;
     }
 
     // Mapping from user addresses to their balances
     mapping(address => uint256) public balances;
 
     // Mapping from user addresses to their roles
-    mapping(address => bool) public verifierList;
-    mapping(address => bool) public personList;
-    mapping(address => bool) public vendorList;
+    mapping(address => verifier[]) public verifierList;
+    mapping(address => person[]) public personList;
+    mapping(address => merchant[]) public merchantList;
 
-    // Function to add a verifier to the verifierList
+    // Function to allow owner to add a verifier
     function addVerifier(
-        string memory _verifier,
-        address _vAddress
-    ) public onlyOwner {
-        // Add the user to the verifierList
-        verifier memory Verifier = verifier({
-            verifierName: _verifier,
-            verifierAddress: _vAddress
-        });
-        verifiers.push(verifier);
+        address _address,
+        string memory _vName,
+        uint256 _vID
+    ) public {
+        //enforce only owner can add verifiers
+        require(msg.sender == owner, "Only owner can add a new verifier.");
+        // add verifier to verifierList
+        verifierList[_address].push(verifier(_vName, _vID));
     }
 
-    // Function to remove a user from the verifierList
-    function removeVerifier(address user) public onlyOwner {
+    // Function to remove a verifier from the verifierList
+    function removeVerifier(address _vAddress) public {
+        //enforce only owner can remove verifiers
+        require(msg.sender == owner, "Only owner can remove a verifier.");
         // Remove the user from the verifierList
-        verifierList[verifier] = false;
+        delete verifierList[_vAddress];
     }
 
     // Function to add a user to the personList
-    function addPerson(address user) public onlyVerifier {
-        // Add the user to the personList
-        personList[user] = true;
+    function addPerson(address _pAddress, string memory _pName) public {
+        //enforce only verifiers can add people
+        require(
+            verifierList[msg.sender] == true,
+            "Only authorised Verifiers can add People"
+        );
+        // Add the user to personList
+        personList[_pAddress] = _pName;
     }
 
     // Function to remove a user from the personList
-    function removePerson(address user) public onlyVerifier {
-        // Remove the user from the personList
-        personList[user] = false;
+    function removePerson(address _PersonToDelete) public {
+        // Only allow verifiers to remove people
+        require(
+            verifierList[msg.sender] == true,
+            "Only authorised Verifiers can remove People"
+        );
+        // Delete the member from personList.
+        personList[_PersonToDelete] = false;
     }
 
-    // Function to transfer tokens to a vendor
-    function spendDonation(
-        address vendor,
-        uint256 amount
-    ) public payable onlyPerson {
-        // Ensure the vendor is in the vendorList
-        require(vendorList[vendor], "Recipient must be in the vendorList");
-        // Ensure the sender has sufficient funds
+    // Function to add a merchant to the merchantList
+    function addMerchant(address _mAddress, string memory _mName) public {
+        //enforce only verifiers can add people
         require(
-            balances[msg.sender] >= amount,
-            "Sender does not have sufficient funds"
+            verifierList[msg.sender] == true,
+            "Only authorised Verifiers can add Merchants"
         );
+        // Add the user to personList
+        merchantList[_mAddress] = _mName;
+    }
 
+    // Function to remove a user from the personList
+    function removeMerchant(address _MerchantToDelete) public {
+        // Only allow verifiers to remove merchants
+        require(
+            verifierList[msg.sender] == true,
+            "Only authorised Verifiers can remove Merchants"
+        );
+        // Delete the member from personList.
+        merchantList[_MerchantToDelete] = false;
+    }
+
+    // Function to transfer tokens to a merchant
+    function spendDonation(address to, uint256 amount) public payable {
+        // Ensure the merchant is in the merchantList
+        require(
+            merchantList[to] == true,
+            "Recipient must be an authorised Merchant"
+        );
+        // Ensure the sender has sufficient funds
+        require(balances[msg.sender] >= amount, "Insufficient funds");
         // Transfer the tokens
         balances[msg.sender] -= amount;
-        balances[vendor] += amount;
+        balances[to] += amount;
     }
 
-    // Address to which vendors can send tokens - live versions of Alteri tokens needs a neutral treasury party to manage funds for the donors/vendors
+    // Address to which merchants can send tokens - live versions of Alteri tokens needs a neutral treasury party to manage funds for the donors/vendors
     // address public treasurerAddress;
 
     // TODO - Widthdraw tokens from vendor to treasury
-    function widthdraw(
-        address owner,
-        uint256 amount
-    ) public payable onlyVendor {}
+    // function widthdraw(
+    //     address owner,
+    //     uint256 amount
+    // ) public payable onlyVendor {
+    //     // Transfer the tokens
+    //     require(
+    //         balances[msg.sender] >= amount,
+    //         "Sender does not have sufficient funds"
+    //     );
+    //     balances[msg.sender] -= amount;
+    //     balances[owner] += amount;
+    // }
 }

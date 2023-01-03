@@ -47,57 +47,47 @@ contract AlteriToken {
         verifierList[_address].push(verifier(_vName, _vID));
     }
 
+    // TODO new method required based on ne array, mapping structs
     // Function to remove a verifier from the verifierList
-    function removeVerifier(address _vAddress) public {
+    //function removeVerifier(address _vAddress) public {
         //enforce only owner can remove verifiers
-        require(msg.sender == owner, "Only owner can remove a verifier.");
+    //    require(msg.sender == owner, "Only owner can remove a verifier.");
         // Remove the user from the verifierList
-        delete verifierList[_vAddress];
-    }
+    //    delete verifierList[_vAddress];
+    //}
 
     // Function to add a user to the personList
-    function addPerson(address _pAddress, string memory _pName) public {
-        //enforce only verifiers can add people
+    function addPerson(
+        address _address,
+        string memory _pName,
+        uint256 _pID
+    ) public {
+        //enforce only owner can add person
         require(
             verifierList[msg.sender] == true,
-            "Only authorised Verifiers can add People"
+            "Only authorised Verifiers can add a Person"
         );
-        // Add the user to personList
-        personList[_pAddress] = _pName;
+        // add person  to personList
+        personList[_address].push(person(_pName, _pID));
     }
-
-    // Function to remove a user from the personList
-    function removePerson(address _PersonToDelete) public {
-        // Only allow verifiers to remove people
-        require(
-            verifierList[msg.sender] == true,
-            "Only authorised Verifiers can remove People"
-        );
-        // Delete the member from personList.
-        personList[_PersonToDelete] = false;
-    }
+    // TODO: Function to remove a user from the personList
 
     // Function to add a merchant to the merchantList
-    function addMerchant(address _mAddress, string memory _mName) public {
-        //enforce only verifiers can add people
+    function addMerchant(
+        address _address,
+        string memory _mName,
+        uint256 _mID
+    ) public {
+        //enforce only owner can add person
         require(
             verifierList[msg.sender] == true,
-            "Only authorised Verifiers can add Merchants"
-        );
-        // Add the user to personList
-        merchantList[_mAddress] = _mName;
+            "Only authorised Verifiers can add a new Merchant"
+        );        
+        // add person  to personList
+        merchantList[_address].push(merchant(_mName, _mID));
     }
+    // TODO: Function to remove a user from the personList
 
-    // Function to remove a user from the personList
-    function removeMerchant(address _MerchantToDelete) public {
-        // Only allow verifiers to remove merchants
-        require(
-            verifierList[msg.sender] == true,
-            "Only authorised Verifiers can remove Merchants"
-        );
-        // Delete the member from personList.
-        merchantList[_MerchantToDelete] = false;
-    }
 
     // Function to transfer tokens to a merchant
     function spendDonation(address to, uint256 amount) public payable {

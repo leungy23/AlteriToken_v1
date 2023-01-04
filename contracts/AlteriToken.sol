@@ -98,6 +98,7 @@ contract AlteriToken is ERC20 {
 
     // TODO create the token
 
+    // TOOOODOOO. see if this is needed at all
     // generic transfer rules
     function transfer(address _from, address _to, uint _amount) internal {
         if (bMap[_from] >= _amount) revert transferError2();

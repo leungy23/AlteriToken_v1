@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.8;
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // TODO implement ensure person(s), vendors and verifiers cannot be in eachothers list
 // example could be like...  if ((pMapping[address].isPerson != false || mMapping[address].isMerchant != false) == true) revert blah
@@ -12,13 +13,13 @@ error transferError1();
 error transferError2();
 error transferError3();
 
-contract AlteriToken {
-    address public treasurer;
-
-    // Make deployer the owner
-    constructor() {
+contract AlteriToken is ERC20 {
+    constructor(uint256 initialSupply) ERC20("AlteriToken", "ATK") {
+        _mint(msg.sender, initialSupply);
         treasurer = msg.sender;
     }
+
+    address public treasurer;
 
     struct person {
         string pName;
@@ -34,7 +35,7 @@ contract AlteriToken {
     }
 
     // Mapping from user addresses to their balances
-    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public bMap;
 
     // Mapping from user addresses to their roles
     mapping(address => verifier) public vMapping;
@@ -98,11 +99,11 @@ contract AlteriToken {
     // TODO create the token
 
     // generic transfer rules
-    function _transfer(address _from, address _to, uint _amount) internal {
-        if (balanceOf[_from] >= _amount) revert transferError2();
-        if (balanceOf[_to] + _amount <= balanceOf[_to]) revert transferError3();
-        balanceOf[_from] -= _amount;
-        balanceOf[_to] += _amount;
+    function transfer(address _from, address _to, uint _amount) internal {
+        if (bMap[_from] >= _amount) revert transferError2();
+        if (bMap[_to] + _amount <= bMap[_to]) revert transferError3();
+        bMap[_from] -= _amount;
+        bMap[_to] += _amount;
     }
 
     // Function to transfer tokens to a merchant
@@ -114,11 +115,40 @@ contract AlteriToken {
         if (pMapping[msg.sender].isPerson != true) revert notAuthorised();
         // Ensure to address is an authorised Merchant
         if (mMapping[to].isMerchant != true) revert notMerchant();
-        // Ensure the sender has sufficient funds
-        require(balanceOf[msg.sender] >= amount, "Insufficient funds");
         // Transfer the tokens
         _transfer(msg.sender, to, amount);
         return true;
     }
-    // TODO - BURN tokens from vendor to treasurer
-}
+
+    // Function to transfer tokens to a merchant
+    function makeDonation(
+        address to,
+        uint256 amount
+    ) public returns (bool success) {
+        // Ensure the spender is an authorised Person
+        if (msg.sender != treasurer) revert notTreasurer();
+        // Ensure to address is an authorised Merchant
+        if (pMapping[to].isPerson != true) revert notAuthorised();
+        // Transfer the tokens
+        _transfer(msg.sender, to, amount);
+        return true;
+    }
+
+    function increaseAllowance(
+        address,
+        uint256
+    ) public virtual override returns (bool) {
+        return false;
+    }
+
+    function approve(address, uint256) public virtual override returns (bool) {
+        return false;
+    }
+
+    function decreaseAllowance(
+        address,
+        uint256
+    ) public virtual override returns (bool) {
+        return false;
+    }
+} // TODO - BURN tokens from vendor to treasurer

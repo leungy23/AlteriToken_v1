@@ -20,13 +20,16 @@ contract AlteriToken {
     struct person {
         string pName;
         bool isPerson;
+        bool isPerson;
     }
     struct verifier {
         string vName;
         bool isVerifier;
+        bool isVerifier;
     }
     struct merchant {
         string mName;
+        bool isMerchant;
         bool isMerchant;
     }
 
@@ -54,10 +57,15 @@ contract AlteriToken {
         string memory _vName,
         bool _isVerifier,
         address _Address
+        bool _isVerifier,
+        address _Address
     ) external {
         //enforce only owner can add verifiers
         if (msg.sender != owner) revert notOwner();
+        if (msg.sender != owner) revert notOwner();
         // add verifier
+        verifier memory newVerifier = verifier(_vName, _isVerifier);
+        vMapping[_Address] = newVerifier;
         verifier memory newVerifier = verifier(_vName, _isVerifier);
         vMapping[_Address] = newVerifier;
         vArray.push(newVerifier);
@@ -68,12 +76,17 @@ contract AlteriToken {
     // Function to add a user to the personList
     function addPerson(
         address _Address,
+        address _Address,
         string memory _pName,
+        bool _isPerson
         bool _isPerson
     ) external {
         //enforce only verifier can add person
         if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
+        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
         // add person  to personList
+        person memory newPerson = person(_pName, _isPerson);
+        pMapping[_Address] = newPerson;
         person memory newPerson = person(_pName, _isPerson);
         pMapping[_Address] = newPerson;
         pArray.push(newPerson);
@@ -86,10 +99,14 @@ contract AlteriToken {
         address _mAddress,
         string memory _mName,
         bool _isMerchant
+        bool _isMerchant
     ) public {
         //enforce only verifier can add merchant
         if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
+        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
         // add merchant
+        merchant memory newMerchant = merchant(_mName, _isMerchant);
+        mMapping[_mAddress] = newMerchant;
         merchant memory newMerchant = merchant(_mName, _isMerchant);
         mMapping[_mAddress] = newMerchant;
         mArray.push(newMerchant);

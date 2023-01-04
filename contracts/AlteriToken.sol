@@ -1,77 +1,81 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-// TODO work out how to ensure person(s), vendors and verifiers cannot be in eachothers list - some require function...  tbc. require(person =! vendorList[]);
+// TODO work out how to ensure person(s), vendors and verifiers cannot be in eachothers list
+// example could be like...  if ((pMapping[address].isPerson != false || mMapping[address].isMerchant != false) == true) revert blah
+
+error notOwner();
+error notVerifier();
+error notMerchant();
+error notAuthorised();
 
 contract AlteriToken {
-    error custError();
-
-    //declare variables
     address public owner;
 
-    //make deployer the owner
+    // Make deployer the owner
     constructor() {
         owner = msg.sender;
     }
 
     struct person {
         string pName;
-        address pAddress;
+        bool isPerson;
     }
-
     struct verifier {
         string vName;
-        address vAddress;
+        bool isVerifier;
     }
-
     struct merchant {
         string mName;
-        address mAddress;
+        bool isMerchant;
     }
 
     // Mapping from user addresses to their balances
     mapping(address => uint256) public balances;
 
     // Mapping from user addresses to their roles
-    mapping(uint256 => verifier) public vMapping;
-    mapping(uint256 => person) public pMapping;
-    mapping(uint256 => merchant) public mMapping;
+    mapping(address => verifier) public vMapping;
+    mapping(address => person) public pMapping;
+    mapping(address => merchant) public mMapping;
 
+    // TODO Mint
+
+    // Create arrays for adding new entities
     verifier[] internal vArray;
     person[] internal pArray;
     merchant[] internal mArray;
 
-    verifier public Verifier;
-    person public Person;
-    merchant public Merchant;
+    // verifier internal Verifier;
+    // person internal Person;
+    // merchant internal Merchant;
 
     // Function to allow owner to add a verifier
     function addVerifier(
-        address _vAddress,
         string memory _vName,
-        uint256 _vID
+        bool _isVerifier,
+        address _Address
     ) external {
         //enforce only owner can add verifiers
-        if (msg.sender != owner) revert custError();
+        if (msg.sender != owner) revert notOwner();
         // add verifier
-        verifier memory newVerifier = verifier(_vName, _vAddress);
-        vMapping[_vID] = newVerifier;
+        verifier memory newVerifier = verifier(_vName, _isVerifier);
+        vMapping[_Address] = newVerifier;
         vArray.push(newVerifier);
     }
 
-    // TODO: Function to remove a verifier from the verifierList
+    // TODO: Function to remove a verifier
 
     // Function to add a user to the personList
     function addPerson(
-        address _pAddress,
+        address _Address,
         string memory _pName,
-        uint256 _pID
+        bool _isPerson
     ) external {
         //enforce only verifier can add person
-        if (msg.sender != Verifier.vAddress) revert custError();
+        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
         // add person  to personList
-        person memory newPerson = person(_pName, _pAddress);
-        pMapping[_pID] = newPerson;
+        person memory newPerson = person(_pName, _isPerson);
+        pMapping[_Address] = newPerson;
         pArray.push(newPerson);
     }
 
@@ -81,24 +85,29 @@ contract AlteriToken {
     function addMerchant(
         address _mAddress,
         string memory _mName,
-        uint256 _mID
+        bool _isMerchant
     ) public {
         //enforce only verifier can add merchant
-        if (msg.sender != Verifier.vAddress) revert custError();
+        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
         // add merchant
-        merchant memory newMerchant = merchant(_mName, _mAddress);
-        mMapping[_mID] = newMerchant;
+        merchant memory newMerchant = merchant(_mName, _isMerchant);
+        mMapping[_mAddress] = newMerchant;
         mArray.push(newMerchant);
     }
 
     // TODO: Function to remove a user from the personList
 
-    // TODO: Function to remove a user from the personList
+    // TODO Balance checker for Person
+    function getBalance(address ContractAddress) public view returns (uint) {
+        return ContractAddress.balance;
+    }
 
     // Function to transfer tokens to a merchant
     function spendDonation(address to, uint256 amount) public payable {
-        // Ensure the merchant is in the merchantList
-        if (msg.sender != Merchant.mAddress) revert custError();
+        // Ensure the spender is an authorised Person
+        if (pMapping[msg.sender].isPerson != true) revert notAuthorised();
+        // Ensure to address is an authorised Merchant
+        if (mMapping[to].isMerchant != true) revert notMerchant();
         // Ensure the sender has sufficient funds
         require(balances[msg.sender] >= amount, "Insufficient funds");
         // Transfer the tokens
@@ -107,19 +116,5 @@ contract AlteriToken {
     }
 
     // Address to which merchants can send tokens - live versions of Alteri tokens needs a neutral treasury party to manage funds for the donors/vendors
-    // address public treasurerAddress;
-
-    // TODO - Widthdraw tokens from vendor to treasury
-    // function widthdraw(
-    //     address owner,
-    //     uint256 amount
-    // ) public payable onlyVendor {
-    //     // Transfer the tokens
-    //     require(
-    //         balances[msg.sender] >= amount,
-    //         "Sender does not have sufficient funds"
-    //     );
-    //     balances[msg.sender] -= amount;
-    //     balances[owner] += amount;
-    // }
+    // TODO - Widthdraw tokens from vendor to Treasury
 }

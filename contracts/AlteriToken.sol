@@ -4,19 +4,20 @@ pragma solidity ^0.8.7;
 // TODO implement ensure person(s), vendors and verifiers cannot be in eachothers list
 // example could be like...  if ((pMapping[address].isPerson != false || mMapping[address].isMerchant != false) == true) revert blah
 
-error notOwner();
+error notTreasurer();
 error notVerifier();
 error notMerchant();
 error notAuthorised();
-
-// add error not treasurer
+error transferError1();
+error transferError2();
+error transferError3();
 
 contract AlteriToken {
-    address public owner;
+    address public treasurer;
 
     // Make deployer the owner
     constructor() {
-        owner = msg.sender;
+        treasurer = msg.sender;
     }
 
     struct person {
@@ -32,10 +33,8 @@ contract AlteriToken {
         bool isMerchant;
     }
 
-    //TODO add struct for tresurer
-
     // Mapping from user addresses to their balances
-    mapping(address => uint256) public balances;
+    mapping(address => uint256) public balanceOf;
 
     // Mapping from user addresses to their roles
     mapping(address => verifier) public vMapping;
@@ -47,14 +46,14 @@ contract AlteriToken {
     person[] internal pArray;
     merchant[] internal mArray;
 
-    // Function to allow owner to add a verifier
+    // Function to allow Treasurer to add a verifier
     function addVerifier(
         string memory _vName,
         bool _isVerifier,
         address _Address
     ) external {
-        //enforce only owner can add verifiers
-        if (msg.sender != owner) revert notOwner();
+        //enforce only Treasurer can add verifiers
+        if (msg.sender != treasurer) revert notTreasurer();
         // add verifier
         verifier memory newVerifier = verifier(_vName, _isVerifier);
         vMapping[_Address] = newVerifier;
@@ -96,21 +95,30 @@ contract AlteriToken {
 
     // TODO Mint from treasurer to person
 
-    //TODO create the token
+    // TODO create the token
 
-    // TODO generic transfer function
+    // generic transfer rules
+    function _transfer(address _from, address _to, uint _amount) internal {
+        if (balanceOf[_from] >= _amount) revert transferError2();
+        if (balanceOf[_to] + _amount <= balanceOf[_to]) revert transferError3();
+        balanceOf[_from] -= _amount;
+        balanceOf[_to] += _amount;
+    }
 
     // Function to transfer tokens to a merchant
-    function spendDonation(address to, uint256 amount) public payable {
+    function spendDonation(
+        address to,
+        uint256 amount
+    ) public returns (bool success) {
         // Ensure the spender is an authorised Person
         if (pMapping[msg.sender].isPerson != true) revert notAuthorised();
         // Ensure to address is an authorised Merchant
         if (mMapping[to].isMerchant != true) revert notMerchant();
         // Ensure the sender has sufficient funds
-        require(balances[msg.sender] >= amount, "Insufficient funds");
+        require(balanceOf[msg.sender] >= amount, "Insufficient funds");
         // Transfer the tokens
-        balances[msg.sender] -= amount;
-        balances[to] += amount;
+        _transfer(msg.sender, to, amount);
+        return true;
     }
-    // TODO - BURN tokens from vendor to Treasury
+    // TODO - BURN tokens from vendor to treasurer
 }

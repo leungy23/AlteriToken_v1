@@ -94,19 +94,6 @@ contract AlteriToken is ERC20 {
         return ContractAddress.balance;
     }
 
-    // TODO Mint from treasurer to person
-
-    // TODO create the token
-
-    // TOOOODOOO. see if this is needed at all
-    // generic transfer rules
-    function transfer(address _from, address _to, uint _amount) internal {
-        if (bMap[_from] >= _amount) revert transferError2();
-        if (bMap[_to] + _amount <= bMap[_to]) revert transferError3();
-        bMap[_from] -= _amount;
-        bMap[_to] += _amount;
-    }
-
     // Function to transfer tokens to a merchant
     function spendDonation(
         address to,
@@ -151,5 +138,17 @@ contract AlteriToken is ERC20 {
         uint256
     ) public virtual override returns (bool) {
         return false;
+    }
+
+    function transfer(address, uint256) public virtual override returns (bool) {
+        revert notAuthorised();
+    }
+
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) public virtual override returns (bool) {
+        revert notAuthorised();
     }
 } // TODO - BURN tokens from vendor to treasurer

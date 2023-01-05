@@ -2,9 +2,6 @@
 pragma solidity ^0.8.8;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-// TODO implement ensure person(s), vendors and verifiers cannot be in eachothers list
-// example could be like...  if ((pMapping[address].isPerson != false || mMapping[address].isMerchant != false) == true) revert blah
-
 error notTreasurer();
 error notVerifier();
 error notMerchant();
@@ -46,6 +43,9 @@ contract AlteriToken is ERC20 {
     verifier[] internal vArray;
     person[] internal pArray;
     merchant[] internal mArray;
+
+    // TODO implement ensure person(s), vendors and verifiers cannot be in eachothers list
+    // example could be like...  if ((pMapping[address].isPerson != false || mMapping[address].isMerchant != false) == true) revert blah
 
     // Function to allow Treasurer to add a verifier
     function addVerifier(
@@ -89,11 +89,6 @@ contract AlteriToken is ERC20 {
         mArray.push(newMerchant);
     }
 
-    // TODO Balance checker for Person
-    function getBalance(address ContractAddress) public view returns (uint) {
-        return ContractAddress.balance;
-    }
-
     // Function to transfer tokens to a merchant
     function spendDonation(
         address to,
@@ -126,18 +121,18 @@ contract AlteriToken is ERC20 {
         address,
         uint256
     ) public virtual override returns (bool) {
-        return false;
+        revert notAuthorised();
     }
 
     function approve(address, uint256) public virtual override returns (bool) {
-        return false;
+        revert notAuthorised();
     }
 
     function decreaseAllowance(
         address,
         uint256
     ) public virtual override returns (bool) {
-        return false;
+        revert notAuthorised();
     }
 
     function transfer(address, uint256) public virtual override returns (bool) {
@@ -151,4 +146,6 @@ contract AlteriToken is ERC20 {
     ) public virtual override returns (bool) {
         revert notAuthorised();
     }
-} // TODO - BURN tokens from vendor to treasurer
+
+    // TODO - BURN tokens from vendor to treasurer
+}

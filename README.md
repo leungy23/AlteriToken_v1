@@ -5,6 +5,7 @@ web3 permissioned, transparent, charity donations
 Project Alteri Token
 </h1>
 
+<img width="726" alt="Screenshot 2022-10-24 at 21 58 02" src="https://user-images.githubusercontent.com/91282434/210984588-b60173cb-2e84-4567-860a-732b006a6d2f.png">
 > This project is in ideation only and is being used as a means to learn while solving some problems.
 ---
 

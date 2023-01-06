@@ -16,13 +16,13 @@ module.exports = {
       chainId: 80001,
     },
   },
-  solidity: "0.8.7",
+  solidity: "0.8.8",
   gasReporter: {
-    enabled: false,
-    outputFile: "gas-report.txt",
+    enabled: true,
+    outputFile: "gas-reporter.txt",
     noColors: true,
     currency: "USD",
     coinmarketcap: CMC_API_KEY,
-    //token: "MATIC",
+    token: "MATIC",
   },
 }

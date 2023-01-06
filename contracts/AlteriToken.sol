@@ -108,10 +108,24 @@ contract AlteriToken is ERC20 {
         address to,
         uint256 amount
     ) public returns (bool success) {
-        // Ensure the spender is an authorised Person
+        // Ensure the spender is a Treasurer
         if (msg.sender != treasurer) revert notTreasurer();
-        // Ensure to address is an authorised Merchant
+        // Ensure to address is an authorised person
         if (pMapping[to].isPerson != true) revert notAuthorised();
+        // Transfer the tokens
+        _transfer(msg.sender, to, amount);
+        return true;
+    }
+
+    // Function to transfer tokens to a merchant
+    function redeemTokens(
+        address to,
+        uint256 amount
+    ) public returns (bool success) {
+        // Ensure the redeemer is a Merchant
+        if (mMapping[msg.sender].isMerchant != true) revert notMerchant();
+        // Ensure to address is the treasurer
+        if (msg.sender != treasurer) revert notTreasurer();
         // Transfer the tokens
         _transfer(msg.sender, to, amount);
         return true;
@@ -146,6 +160,36 @@ contract AlteriToken is ERC20 {
     ) public virtual override returns (bool) {
         revert notAuthorised();
     }
-
-    // TODO - BURN tokens from vendor to treasurer
 }
+
+//// ACTORS
+
+//  A.  0x5B3...eddC4   <- treasurer (contract deployer)
+//  B.  0xAb84...35cb2  <- verifier (created by treasurer)
+//  C.  0x4B2...C02db   <- person (created by verifier)
+//  D.  0x787...cabaB   <- merchant: (created by verifier)
+
+//// FLOW
+
+//  1 - deploy contact with 1000 tokens
+//  2 - treasurer creates verifiers
+//  3 - verifier creates person
+//  4 - verifier creates merchant
+//  5 - treasurer donates tokens to person - TODO 'real donor' => person
+//  6 - person spends donation at merchant
+//  7 - merchant redeems fiat
+
+//// NEXT STEPS
+
+// 1 - For altiertoken.sol, write test scripts and optimise gas, peer review/audit
+
+// 2 - Mobile dApp built (figma's started)
+// 3 - Partner with NGO who can act as treasurer
+// 4 - Partner charity / merchants
+// 5 - Marketing required to get sign ups
+// 6 - DiD for orgs
+
+//// CHALLENGES
+
+// 1 - Programmable CBDCs
+// 2 - Finding the right partners

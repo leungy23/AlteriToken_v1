@@ -90,20 +90,6 @@ contract AlteriToken is ERC20 {
     }
 
     // Function to transfer tokens to a merchant
-    function spendDonation(
-        address to,
-        uint256 amount
-    ) public returns (bool success) {
-        // Ensure the spender is an authorised Person
-        if (pMapping[msg.sender].isPerson != true) revert notAuthorised();
-        // Ensure to address is an authorised Merchant
-        if (mMapping[to].isMerchant != true) revert notMerchant();
-        // Transfer the tokens
-        _transfer(msg.sender, to, amount);
-        return true;
-    }
-
-    // Function to transfer tokens to a merchant
     function makeDonation(
         address to,
         uint256 amount
@@ -112,6 +98,20 @@ contract AlteriToken is ERC20 {
         if (msg.sender != treasurer) revert notTreasurer();
         // Ensure to address is an authorised person
         if (pMapping[to].isPerson != true) revert notAuthorised();
+        // Transfer the tokens
+        _transfer(msg.sender, to, amount);
+        return true;
+    }
+
+    // Function to transfer tokens to a merchant
+    function spendDonation(
+        address to,
+        uint256 amount
+    ) public returns (bool success) {
+        // Ensure the spender is an authorised Person
+        if (pMapping[msg.sender].isPerson != true) revert notAuthorised();
+        // Ensure to address is an authorised Merchant
+        if (mMapping[to].isMerchant != true) revert notMerchant();
         // Transfer the tokens
         _transfer(msg.sender, to, amount);
         return true;

@@ -2,13 +2,13 @@
 pragma solidity ^0.8.8;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-error notTreasurer();
-error notVerifier();
-error notMerchant();
-error notAuthorised();
-error transferError1();
-error transferError2();
-error transferError3();
+error AlteriToken__notTreasurer();
+error AlteriToken__notVerifier();
+error AlteriToken__notMerchant();
+error AlteriToken__notAuthorised();
+error AlteriToken__transferError1();
+error AlteriToken__transferError2();
+error AlteriToken__transferError3();
 
 contract AlteriToken is ERC20 {
     constructor(uint256 initialSupply) ERC20("AlteriToken", "ATK") {
@@ -44,7 +44,7 @@ contract AlteriToken is ERC20 {
     person[] internal pArray;
     merchant[] internal mArray;
 
-    // TODO implement ensure person(s), vendors and verifiers cannot be in eachothers list
+    // TODO implement ensure person(s), vendors and verifiers can not be in eachothers list
     // example could be like...  if ((pMapping[address].isPerson != false || mMapping[address].isMerchant != false) == true) revert blah
 
     // Function to allow Treasurer to add a verifier
@@ -54,7 +54,7 @@ contract AlteriToken is ERC20 {
         address _Address
     ) external {
         //enforce only Treasurer can add verifiers
-        if (msg.sender != treasurer) revert notTreasurer();
+        if (msg.sender != treasurer) revert AlteriToken__notTreasurer();
         // add verifier
         verifier memory newVerifier = verifier(_vName, _isVerifier);
         vMapping[_Address] = newVerifier;
@@ -68,7 +68,7 @@ contract AlteriToken is ERC20 {
         bool _isPerson
     ) external {
         //enforce only verifier can add person
-        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
+        if (vMapping[msg.sender].isVerifier != true) revert AlteriToken__notVerifier();
         // add person  to personList
         person memory newPerson = person(_pName, _isPerson);
         pMapping[_Address] = newPerson;
@@ -82,7 +82,7 @@ contract AlteriToken is ERC20 {
         bool _isMerchant
     ) public {
         //enforce only verifier can add merchant
-        if (vMapping[msg.sender].isVerifier != true) revert notVerifier();
+        if (vMapping[msg.sender].isVerifier != true) revert AlteriToken__notVerifier();
         // add merchant
         merchant memory newMerchant = merchant(_mName, _isMerchant);
         mMapping[_mAddress] = newMerchant;
@@ -95,9 +95,9 @@ contract AlteriToken is ERC20 {
         uint256 amount
     ) public returns (bool success) {
         // Ensure the spender is a Treasurer
-        if (msg.sender != treasurer) revert notTreasurer();
+        if (msg.sender != treasurer) revert AlteriToken__notTreasurer();
         // Ensure to address is an authorised person
-        if (pMapping[to].isPerson != true) revert notAuthorised();
+        if (pMapping[to].isPerson != true) revert AlteriToken__notAuthorised();
         // Transfer the tokens
         _transfer(msg.sender, to, amount);
         return true;
@@ -109,9 +109,9 @@ contract AlteriToken is ERC20 {
         uint256 amount
     ) public returns (bool success) {
         // Ensure the spender is an authorised Person
-        if (pMapping[msg.sender].isPerson != true) revert notAuthorised();
+        if (pMapping[msg.sender].isPerson != true) revert AlteriToken__notAuthorised();
         // Ensure to address is an authorised Merchant
-        if (mMapping[to].isMerchant != true) revert notMerchant();
+        if (mMapping[to].isMerchant != true) revert AlteriToken__notMerchant();
         // Transfer the tokens
         _transfer(msg.sender, to, amount);
         return true;
@@ -123,9 +123,9 @@ contract AlteriToken is ERC20 {
         uint256 amount
     ) public returns (bool success) {
         // Ensure the redeemer is a Merchant
-        if (mMapping[msg.sender].isMerchant != true) revert notMerchant();
+        if (mMapping[msg.sender].isMerchant != true) revert AlteriToken__notMerchant();
         // Ensure to address is the treasurer
-        if (msg.sender != treasurer) revert notTreasurer();
+        if (msg.sender != treasurer) revert AlteriToken__notTreasurer();
         // Transfer the tokens
         _transfer(msg.sender, to, amount);
         return true;
@@ -135,22 +135,22 @@ contract AlteriToken is ERC20 {
         address,
         uint256
     ) public virtual override returns (bool) {
-        revert notAuthorised();
+        revert AlteriToken__notAuthorised();
     }
 
     function approve(address, uint256) public virtual override returns (bool) {
-        revert notAuthorised();
+        revert AlteriToken__notAuthorised();
     }
 
     function decreaseAllowance(
         address,
         uint256
     ) public virtual override returns (bool) {
-        revert notAuthorised();
+        revert AlteriToken__notAuthorised();
     }
 
     function transfer(address, uint256) public virtual override returns (bool) {
-        revert notAuthorised();
+        revert AlteriToken__notAuthorised();
     }
 
     function transferFrom(
@@ -158,11 +158,11 @@ contract AlteriToken is ERC20 {
         address,
         uint256
     ) public virtual override returns (bool) {
-        revert notAuthorised();
+        revert AlteriToken__notAuthorised();
     }
 }
 
-//// ACTORS
+//// ACTORS (remix demo)
 
 //  A.  0x5B3...eddC4   <- treasurer (contract deployer)
 //  B.  0xAb84...35cb2  <- verifier (created by treasurer)

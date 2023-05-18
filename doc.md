@@ -1,7 +1,7 @@
 # documentation for Alteritoken.sol
 
 ## Functions
-
+### addPerson
 ```solidity
 function addPerson(
         address _Address,
@@ -19,11 +19,13 @@ function addPerson(
 
 The 'addPerson' function is used to add a person to the contract. The function takes two arguments, the address of the person to be added and the name of the person to be added. The function will fail if the person is already added to the contract.
 
-## usage of addPerson
+### usage of addPerson
   
   ```solidity
   addPerson(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, "John Doe", true);
   ```
+
+### makeDonation
 
 ```solidity
  function makeDonation(
@@ -42,7 +44,7 @@ The 'addPerson' function is used to add a person to the contract. The function t
 
 The 'makeDonation' function is used to make a donation to a person. The function takes two arguments, the address of the person to be donated to and the amount of tokens to be donated. The function will fail if either the person is not authorised to receive donations or if the sender is not the Treasurer.
 
-## usage of makeDonation
+### usage of makeDonation
   
   ```solidity
   makeDonation(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, 100);

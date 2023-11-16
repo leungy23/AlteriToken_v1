@@ -3,20 +3,20 @@ Project Alteri Token
 
 </h1>
 <h3 align="center">
-web3 permissioned, transparent, charity donations
+Fun POC for web3 permissioned, transparent, charity donations
 </h3>
 
 <p align="center">
   <img width="726" alt="Screenshot 2022-10-24 at 21 58 02" src="https://user-images.githubusercontent.com/91282434/210984588-b60173cb-2e84-4567-860a-732b006a6d2f.png">
 </p>
 
-> This project is in ideation only and is being used as a means to learn while solving some problems.
+> This project is in ideation only and is being used as a means to learn while solving some problems - there are Orwellian concerns over the implementation so read this as a POC only. If you like the idea - please take a look at a non blockchain solution doing real work in the real world now -> https://www.givedirectly.org/   (no affiliation)
 
 ---
 
 # About this project
 
-### Visit www.alteritoken.com for more
+### 
 
 ### Mobile UI/UX
 

@@ -28,4 +28,9 @@ Possible look and feel - maybe too 'tech' looking might want something more 'fri
 
 ### Smart Contracts
 
-## To be completed - see contracts folder
+## See contracts folder
+
+### Workflow diagram
+
+<img width="1108" alt="Screenshot 2023-11-23 at 11 51 37" src="https://github.com/leungy23/AlteriToken_v1/assets/91282434/e4ef9fd5-c603-4144-9da9-12bb19613430">
+
